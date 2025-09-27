@@ -18,6 +18,8 @@ const TeacherDashboard = () => {
   const [loadingStudentSummaries, setLoadingStudentSummaries] = useState<Record<string, boolean>>({});
   const [periodSummary, setPeriodSummary] = useState<string>('');
   const [loadingPeriodSummary, setLoadingPeriodSummary] = useState(false);
+  const [teacherRecommendations, setTeacherRecommendations] = useState<string>('');
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
 
   useEffect(() => {
     fetchStudentFeedback();
@@ -278,6 +280,30 @@ const TeacherDashboard = () => {
     }
   };
 
+  const generateTeacherRecommendations = async () => {
+    if (loadingRecommendations || !periodSummary) return;
+    
+    setLoadingRecommendations(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-teacher-recommendations', {
+        body: { 
+          periodSummary,
+          group: selectedGroup, 
+          dateRange: selectedDate 
+        }
+      });
+
+      if (error) throw error;
+      
+      setTeacherRecommendations(data.recommendations);
+    } catch (error) {
+      console.error('Error generating teacher recommendations:', error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-teacher-bg p-4">
       <div className="mx-auto max-w-7xl">
@@ -421,9 +447,43 @@ const TeacherDashboard = () => {
           </CardHeader>
           <CardContent>
             {periodSummary ? (
-              <div className="bg-white/50 dark:bg-gray-900/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="whitespace-pre-line text-foreground leading-relaxed">
-                  {periodSummary}
+              <div className="space-y-4">
+                <div className="bg-white/50 dark:bg-gray-900/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <div className="whitespace-pre-line text-foreground leading-relaxed">
+                    {periodSummary}
+                  </div>
+                </div>
+                
+                {/* Recommendations Section */}
+                <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-green-800 dark:text-green-300 flex items-center gap-2">
+                      💡 Recomendaciones Pedagógicas
+                    </h4>
+                    <Button
+                      onClick={generateTeacherRecommendations}
+                      disabled={loadingRecommendations}
+                      variant="outline"
+                      size="sm"
+                      className="border-green-300 hover:bg-green-100 dark:border-green-700 dark:hover:bg-green-950"
+                    >
+                      {loadingRecommendations ? 'Generando...' : 'Generar Recomendaciones'}
+                    </Button>
+                  </div>
+                  
+                  {teacherRecommendations ? (
+                    <div className="bg-white/70 dark:bg-gray-900/70 p-4 rounded-lg">
+                      <div className="whitespace-pre-line text-sm text-foreground leading-relaxed">
+                        {teacherRecommendations}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-white/30 dark:bg-gray-900/30 p-4 rounded-lg border border-dashed border-green-300 dark:border-green-700 text-center">
+                      <p className="text-sm text-muted-foreground italic">
+                        Genera recomendaciones específicas basadas en el resumen ejecutivo para mejorar el trabajo en equipo.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
