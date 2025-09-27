@@ -403,6 +403,57 @@ const TeacherDashboard = () => {
     }
   };
 
+  const exportToCSV = () => {
+    if (filteredInsights.length === 0) {
+      alert('No hay datos para exportar');
+      return;
+    }
+
+    const headers = [
+      'Fecha',
+      'Estudiante',
+      'Grupo',
+      'Contribución al equipo',
+      'Comunicación con compañeros',
+      'Desafíos del equipo',
+      'Objetivos cumplidos',
+      'Áreas de mejora',
+      'Sentimientos sobre trabajo en equipo'
+    ];
+
+    const csvData = filteredInsights.map(insight => [
+      insight.date,
+      insight.student,
+      insight.group,
+      insight.originalFeedback.question1_response || '',
+      insight.originalFeedback.question2_response || '',
+      insight.originalFeedback.question3_response || '',
+      insight.originalFeedback.question4_response || '',
+      insight.originalFeedback.question5_response || '',
+      insight.originalFeedback.question6_response || ''
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => 
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+      )
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `respuestas-estudiantes-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-teacher-bg p-4">
       <div className="mx-auto max-w-7xl">
@@ -454,6 +505,16 @@ const TeacherDashboard = () => {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button 
+                onClick={exportToCSV}
+                variant="outline"
+                disabled={filteredInsights.length === 0}
+                className="flex items-center gap-2"
+              >
+                📄 Exportar Respuestas (CSV)
+              </Button>
             </div>
           </CardContent>
         </Card>
