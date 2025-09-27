@@ -549,7 +549,7 @@ const TeacherDashboard = () => {
                     <Tooltip 
                       formatter={(value, name) => [
                         name === 'yes' ? `Sí: ${value}` : `No: ${value}`,
-                        'Respuestas'
+                        name === 'yes' ? 'Respuestas Sí' : 'Respuestas No'
                       ]}
                       labelFormatter={(label) => `Pregunta: ${label.replace('\n', ' ')}`}
                     />
