@@ -422,8 +422,13 @@ const TeacherDashboard = () => {
                 </Select>
               </div>
               <div className="flex items-end">
-                <Button variant="teacher" className="w-full">
-                  Generar Reporte
+                <Button 
+                  variant="teacher" 
+                  className="w-full"
+                  onClick={generatePeriodSummary}
+                  disabled={loadingPeriodSummary}
+                >
+                  {loadingPeriodSummary ? 'Generando...' : 'Generar Reporte'}
                 </Button>
               </div>
             </div>
