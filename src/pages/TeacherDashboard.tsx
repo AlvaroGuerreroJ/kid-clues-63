@@ -116,16 +116,45 @@ const TeacherDashboard = () => {
   };
 
   const filteredInsights = insights.filter(insight => {
-    if (selectedGroup === "all") return true;
-    const groupDisplayName = getGroupDisplayName(selectedGroup);
-    return insight.group === groupDisplayName;
+    // Filter by group
+    if (selectedGroup !== "all") {
+      const groupDisplayName = getGroupDisplayName(selectedGroup);
+      if (insight.group !== groupDisplayName) return false;
+    }
+    
+    // Filter by date
+    const insightDate = new Date(insight.date);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // End of today
+    
+    switch (selectedDate) {
+      case "today":
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        return insightDate >= startOfToday && insightDate <= today;
+      
+      case "week":
+        const weekAgo = new Date();
+        weekAgo.setDate(today.getDate() - 7);
+        weekAgo.setHours(0, 0, 0, 0);
+        return insightDate >= weekAgo && insightDate <= today;
+      
+      case "month":
+        const monthAgo = new Date();
+        monthAgo.setMonth(today.getMonth() - 1);
+        monthAgo.setHours(0, 0, 0, 0);
+        return insightDate >= monthAgo && insightDate <= today;
+      
+      default:
+        return true;
+    }
   });
 
   const calculateStats = () => {
-    const total = insights.length;
-    const positive = insights.filter(i => i.sentiment === 'positive').length;
-    const attention = insights.filter(i => i.sentiment === 'attention').length;
-    const activeGroups = [...new Set(insights.map(i => i.group))].length;
+    const total = filteredInsights.length;
+    const positive = filteredInsights.filter(i => i.sentiment === 'positive').length;
+    const attention = filteredInsights.filter(i => i.sentiment === 'attention').length;
+    const activeGroups = [...new Set(filteredInsights.map(i => i.group))].length;
     
     return {
       total,
@@ -392,7 +421,7 @@ const TeacherDashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <label className="text-sm font-medium">Grupo de Estudiantes</label>
                 <Select value={selectedGroup} onValueChange={setSelectedGroup}>
@@ -420,16 +449,6 @@ const TeacherDashboard = () => {
                     <SelectItem value="month">Este Mes</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="flex items-end">
-                <Button 
-                  variant="teacher" 
-                  className="w-full"
-                  onClick={generatePeriodSummary}
-                  disabled={loadingPeriodSummary}
-                >
-                  {loadingPeriodSummary ? 'Generando...' : 'Generar Reporte'}
-                </Button>
               </div>
             </div>
           </CardContent>
