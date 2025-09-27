@@ -15,12 +15,12 @@ const Index = () => {
           </div>
           
           <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Link to="/student-form">
+            <Link to="/student">
               <Button variant="student" size="lg" className="w-full sm:w-auto">
                 📝 Formulario Estudiante
               </Button>
             </Link>
-            <Link to="/teacher-dashboard">
+            <Link to="/teacher">
               <Button variant="teacher" size="lg" className="w-full sm:w-auto">
                 📊 Panel del Profesor
               </Button>
