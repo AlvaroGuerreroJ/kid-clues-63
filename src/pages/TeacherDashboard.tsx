@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, UsersIcon, TrendingUpIcon, AlertTriangleIcon, MessageSquareIcon } from "lucide-react";
+import { CalendarIcon, UsersIcon, TrendingUpIcon, AlertTriangleIcon, MessageSquareIcon, CheckCircleIcon, XCircleIcon, BarChart3Icon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const TeacherDashboard = () => {
   const [selectedGroup, setSelectedGroup] = useState("all");
@@ -134,7 +135,72 @@ const TeacherDashboard = () => {
     };
   };
 
+  const calculateYesNoMetrics = () => {
+    const metrics = {
+      question1: { yes: 0, no: 0, total: 0 },
+      question2: { yes: 0, no: 0, total: 0 },
+      question3: { yes: 0, no: 0, total: 0 }
+    };
+
+    filteredInsights.forEach(insight => {
+      if (insight.originalFeedback?.question1_response) {
+        metrics.question1.total++;
+        if (insight.originalFeedback.question1_response.toLowerCase() === 'sí') {
+          metrics.question1.yes++;
+        } else if (insight.originalFeedback.question1_response.toLowerCase() === 'no') {
+          metrics.question1.no++;
+        }
+      }
+      
+      if (insight.originalFeedback?.question2_response) {
+        metrics.question2.total++;
+        if (insight.originalFeedback.question2_response.toLowerCase() === 'sí') {
+          metrics.question2.yes++;
+        } else if (insight.originalFeedback.question2_response.toLowerCase() === 'no') {
+          metrics.question2.no++;
+        }
+      }
+      
+      if (insight.originalFeedback?.question3_response) {
+        metrics.question3.total++;
+        if (insight.originalFeedback.question3_response.toLowerCase() === 'sí') {
+          metrics.question3.yes++;
+        } else if (insight.originalFeedback.question3_response.toLowerCase() === 'no') {
+          metrics.question3.no++;
+        }
+      }
+    });
+
+    return metrics;
+  };
+
+  const getChartData = () => {
+    const metrics = calculateYesNoMetrics();
+    return [
+      {
+        question: "Respeto\nOpiniones",
+        yes: metrics.question1.yes,
+        no: metrics.question1.no,
+        yesPercentage: metrics.question1.total > 0 ? Math.round((metrics.question1.yes / metrics.question1.total) * 100) : 0
+      },
+      {
+        question: "Cumplimiento\nRoles",
+        yes: metrics.question2.yes,
+        no: metrics.question2.no,
+        yesPercentage: metrics.question2.total > 0 ? Math.round((metrics.question2.yes / metrics.question2.total) * 100) : 0
+      },
+      {
+        question: "Pedir\nAyuda",
+        yes: metrics.question3.yes,
+        no: metrics.question3.no,
+        yesPercentage: metrics.question3.total > 0 ? Math.round((metrics.question3.yes / metrics.question3.total) * 100) : 0
+      }
+    ];
+  };
+
   const stats = calculateStats();
+  const yesNoMetrics = calculateYesNoMetrics();
+  const chartData = getChartData();
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
@@ -364,7 +430,109 @@ const TeacherDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Stats Overview */}
+        {/* Yes/No Questions Metrics */}
+        <Card className="mb-6 bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/20 dark:to-green-950/20 border-emerald-200 dark:border-emerald-800">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-emerald-500 rounded-lg">
+                <BarChart3Icon className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-xl">📊 Métricas de Trabajo en Equipo</CardTitle>
+                <CardDescription>Análisis de respuestas Sí/No sobre colaboración</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Individual Metrics Cards */}
+              <div className="space-y-4">
+                <div className="bg-white/60 dark:bg-gray-900/60 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                  <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-3">Respuestas por Pregunta</h4>
+                  
+                  {/* Question 1 */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">¿Respetamos opiniones?</span>
+                      <span className="text-xs text-muted-foreground">{yesNoMetrics.question1.total} respuestas</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex items-center gap-1">
+                        <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 dark:text-green-400">Sí: {yesNoMetrics.question1.yes}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <XCircleIcon className="h-4 w-4 text-red-600" />
+                        <span className="text-sm text-red-700 dark:text-red-400">No: {yesNoMetrics.question1.no}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question 2 */}
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">¿Cumplimos roles?</span>
+                      <span className="text-xs text-muted-foreground">{yesNoMetrics.question2.total} respuestas</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex items-center gap-1">
+                        <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 dark:text-green-400">Sí: {yesNoMetrics.question2.yes}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <XCircleIcon className="h-4 w-4 text-red-600" />
+                        <span className="text-sm text-red-700 dark:text-red-400">No: {yesNoMetrics.question2.no}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question 3 */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">¿Pedimos ayuda?</span>
+                      <span className="text-xs text-muted-foreground">{yesNoMetrics.question3.total} respuestas</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <div className="flex items-center gap-1">
+                        <CheckCircleIcon className="h-4 w-4 text-green-600" />
+                        <span className="text-sm text-green-700 dark:text-green-400">Sí: {yesNoMetrics.question3.yes}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <XCircleIcon className="h-4 w-4 text-red-600" />
+                        <span className="text-sm text-red-700 dark:text-red-400">No: {yesNoMetrics.question3.no}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chart */}
+              <div className="bg-white/60 dark:bg-gray-900/60 p-4 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                <h4 className="font-semibold text-emerald-800 dark:text-emerald-300 mb-3">Porcentaje de Respuestas Positivas</h4>
+                <ResponsiveContainer width="100%" height={200}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis 
+                      dataKey="question" 
+                      fontSize={11}
+                      interval={0}
+                    />
+                    <YAxis />
+                    <Tooltip 
+                      formatter={(value, name) => [
+                        name === 'yes' ? `Sí: ${value}` : `No: ${value}`,
+                        'Respuestas'
+                      ]}
+                      labelFormatter={(label) => `Pregunta: ${label.replace('\n', ' ')}`}
+                    />
+                    <Bar dataKey="yes" fill="#10b981" name="Sí" />
+                    <Bar dataKey="no" fill="#ef4444" name="No" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card className="shadow-card">
             <CardContent className="p-6">

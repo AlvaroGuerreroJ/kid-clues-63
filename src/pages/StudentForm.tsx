@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -22,12 +23,12 @@ const StudentForm = () => {
   const { toast } = useToast();
 
   const questions = [
-    "¿Respetamos las opiniones de los compañeros?",
-    "¿Cumplimos el rol que se nos designó en equipo?",
-    "¿Pedimos ayuda al grupo cuando tenemos dudas?",
-    "¿Cómo te sentiste durante tu trabajo en equipo? ¿Por qué?",
-    "¿Con quién te gustaría trabajar? ¿Por qué?",
-    "¿Con quién tuviste dificultades al trabajar en equipo?",
+    { text: "¿Respetamos las opiniones de los compañeros?", type: "yesno" },
+    { text: "¿Cumplimos el rol que se nos designó en equipo?", type: "yesno" },
+    { text: "¿Pedimos ayuda al grupo cuando tenemos dudas?", type: "yesno" },
+    { text: "¿Cómo te sentiste durante tu trabajo en equipo? ¿Por qué?", type: "text" },
+    { text: "¿Con quién te gustaría trabajar? ¿Por qué?", type: "text" },
+    { text: "¿Con quién tuviste dificultades al trabajar en equipo?", type: "text" },
   ];
 
   const handleResponseChange = (questionKey: string, value: string) => {
@@ -44,6 +45,16 @@ const StudentForm = () => {
       toast({
         title: "Información Faltante",
         description: "Por favor ingresa tu nombre y selecciona tu grupo.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate that first 3 questions (yes/no) are answered
+    if (!responses.question1 || !responses.question2 || !responses.question3) {
+      toast({
+        title: "Respuestas Faltantes",
+        description: "Por favor responde todas las preguntas de sí/no.",
         variant: "destructive",
       });
       return;
@@ -156,17 +167,38 @@ const StudentForm = () => {
                   Pregunta {index + 1}
                 </CardTitle>
                 <CardDescription className="text-base">
-                  {question}
+                  {question.text}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Textarea
-                  value={responses[`question${index + 1}` as keyof typeof responses]}
-                  onChange={(e) => handleResponseChange(`question${index + 1}`, e.target.value)}
-                  placeholder="Escribe tu respuesta aquí..."
-                  className="min-h-[100px] transition-all duration-200 focus:ring-secondary/20"
-                  rows={4}
-                />
+                {question.type === "yesno" ? (
+                  <RadioGroup
+                    value={responses[`question${index + 1}` as keyof typeof responses]}
+                    onValueChange={(value) => handleResponseChange(`question${index + 1}`, value)}
+                    className="flex gap-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="sí" id={`q${index + 1}-yes`} />
+                      <Label htmlFor={`q${index + 1}-yes`} className="text-base cursor-pointer">
+                        Sí ✅
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="no" id={`q${index + 1}-no`} />
+                      <Label htmlFor={`q${index + 1}-no`} className="text-base cursor-pointer">
+                        No ❌
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                ) : (
+                  <Textarea
+                    value={responses[`question${index + 1}` as keyof typeof responses]}
+                    onChange={(e) => handleResponseChange(`question${index + 1}`, e.target.value)}
+                    placeholder="Escribe tu respuesta aquí..."
+                    className="min-h-[100px] transition-all duration-200 focus:ring-secondary/20"
+                    rows={4}
+                  />
+                )}
               </CardContent>
             </Card>
           ))}
