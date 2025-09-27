@@ -61,10 +61,10 @@ const TeacherDashboard = () => {
   };
 
   const analyzeSentiment = (feedback: any) => {
-    const positiveWords = ['emocionada', 'feliz', 'genial', 'excelente', 'increíble', 'fantástica', 'motivada', 'orgullosa', 'entusiasmado', 'confiada'];
-    const negativeWords = ['confundido', 'difícil', 'nervioso', 'cansada', 'complicados', 'costó'];
+    const positiveWords = ['emocionada', 'feliz', 'genial', 'excelente', 'increíble', 'fantástica', 'motivada', 'orgullosa', 'entusiasmado', 'confiada', 'bien', 'contento', 'sí', 'súper', 'divertido'];
+    const negativeWords = ['confundido', 'difícil', 'nervioso', 'cansada', 'complicados', 'costó', 'mal', 'aburrido', 'dificultades', 'no'];
     
-    const allText = `${feedback.question1_response} ${feedback.question2_response} ${feedback.question3_response} ${feedback.question4_response}`.toLowerCase();
+    const allText = `${feedback.question1_response || ''} ${feedback.question2_response || ''} ${feedback.question3_response || ''} ${feedback.question4_response || ''} ${feedback.question5_response || ''} ${feedback.question6_response || ''}`.toLowerCase();
     
     const positiveCount = positiveWords.filter(word => allText.includes(word)).length;
     const negativeCount = negativeWords.filter(word => allText.includes(word)).length;
@@ -75,29 +75,30 @@ const TeacherDashboard = () => {
   };
 
   const generateSummary = (feedback: any) => {
-    const responses = [feedback.question1_response, feedback.question2_response, feedback.question3_response, feedback.question4_response];
+    const responses = [feedback.question1_response, feedback.question2_response, feedback.question3_response, feedback.question4_response, feedback.question5_response, feedback.question6_response].filter(r => r);
     const mainResponse = responses.find(r => r && r.length > 50) || responses.find(r => r && r.length > 0) || '';
     return mainResponse.substring(0, 100) + (mainResponse.length > 100 ? '...' : '');
   };
 
   const extractKeyWords = (feedback: any) => {
-    const allText = `${feedback.question1_response} ${feedback.question2_response} ${feedback.question3_response} ${feedback.question4_response}`.toLowerCase();
-    const keywords = ['matemáticas', 'ciencias', 'lectura', 'equipo', 'difícil', 'fácil', 'interesante', 'aburrido', 'divertido'];
+    const allText = `${feedback.question1_response || ''} ${feedback.question2_response || ''} ${feedback.question3_response || ''} ${feedback.question4_response || ''} ${feedback.question5_response || ''} ${feedback.question6_response || ''}`.toLowerCase();
+    const keywords = ['equipo', 'trabajo', 'colaborar', 'ayuda', 'compañeros', 'grupo', 'difícil', 'fácil', 'bien', 'mal'];
     return keywords.filter(word => allText.includes(word)).slice(0, 3);
   };
 
   const extractConcerns = (feedback: any) => {
-    const allText = `${feedback.question1_response} ${feedback.question2_response} ${feedback.question3_response} ${feedback.question4_response}`.toLowerCase();
+    const allText = `${feedback.question1_response || ''} ${feedback.question2_response || ''} ${feedback.question3_response || ''} ${feedback.question4_response || ''} ${feedback.question5_response || ''} ${feedback.question6_response || ''}`.toLowerCase();
     const concerns = [];
-    if (allText.includes('difícil') || allText.includes('complicado')) concerns.push('dificultad académica');
-    if (allText.includes('nervioso') || allText.includes('confundido')) concerns.push('ansiedad');
-    if (allText.includes('cansado') || allText.includes('cansada')) concerns.push('fatiga');
+    if (allText.includes('dificultades') || allText.includes('difícil') || allText.includes('problemas')) concerns.push('dificultades de colaboración');
+    if (allText.includes('no') && (allText.includes('ayuda') || allText.includes('grupo'))) concerns.push('falta de comunicación');
+    if (allText.includes('mal') || allText.includes('aburrido')) concerns.push('sentimiento negativo');
     return concerns;
   };
 
   const filteredInsights = insights.filter(insight => {
     if (selectedGroup === "all") return true;
-    return insight.group.includes(selectedGroup.split('-')[1]?.charAt(0).toUpperCase() + (selectedGroup.split('-')[1]?.slice(1) || ''));
+    const groupDisplayName = getGroupDisplayName(selectedGroup);
+    return insight.group === groupDisplayName;
   });
 
   const calculateStats = () => {
@@ -222,10 +223,10 @@ const TeacherDashboard = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos los Grupos</SelectItem>
-                    <SelectItem value="Group A - Dolphins">Grupo A - Delfines</SelectItem>
-                    <SelectItem value="Group B - Eagles">Grupo B - Águilas</SelectItem>
-                    <SelectItem value="Group C - Lions">Grupo C - Leones</SelectItem>
-                    <SelectItem value="Group D - Owls">Grupo D - Búhos</SelectItem>
+                    <SelectItem value="group-a">Grupo A - Delfines</SelectItem>
+                    <SelectItem value="group-b">Grupo B - Águilas</SelectItem>
+                    <SelectItem value="group-c">Grupo C - Leones</SelectItem>
+                    <SelectItem value="group-d">Grupo D - Búhos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
