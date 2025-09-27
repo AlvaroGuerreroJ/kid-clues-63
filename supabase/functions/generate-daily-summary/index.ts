@@ -97,7 +97,7 @@ Genera un resumen textual comprensivo de máximo 200 palabras que incluya:
 
 El resumen debe ser profesional, constructivo y enfocado en aspectos pedagógicos.`;
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
