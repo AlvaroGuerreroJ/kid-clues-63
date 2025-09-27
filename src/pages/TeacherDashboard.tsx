@@ -12,6 +12,8 @@ const TeacherDashboard = () => {
   const [selectedDate, setSelectedDate] = useState("today");
   const [insights, setInsights] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dailySummaries, setDailySummaries] = useState<Record<string, string>>({});
+  const [loadingSummaries, setLoadingSummaries] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchStudentFeedback();
@@ -190,7 +192,30 @@ const TeacherDashboard = () => {
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
 
-  const dailySummaries = generateDailySummaries();
+  const dailySummariesData = generateDailySummaries();
+
+  const generateTextualSummary = async (date: string, group: string) => {
+    if (loadingSummaries[date]) return;
+    
+    setLoadingSummaries(prev => ({ ...prev, [date]: true }));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-daily-summary', {
+        body: { date, group }
+      });
+
+      if (error) throw error;
+      
+      setDailySummaries(prev => ({
+        ...prev,
+        [date]: data.summary
+      }));
+    } catch (error) {
+      console.error('Error generating summary:', error);
+    } finally {
+      setLoadingSummaries(prev => ({ ...prev, [date]: false }));
+    }
+  };
 
   return (
     <div className="min-h-screen bg-teacher-bg p-4">
@@ -322,12 +347,12 @@ const TeacherDashboard = () => {
             <div className="text-center py-8">
               <p className="text-muted-foreground">Cargando resúmenes...</p>
             </div>
-          ) : dailySummaries.length === 0 ? (
+          ) : dailySummariesData.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground">No hay datos suficientes para generar resúmenes diarios.</p>
             </div>
           ) : (
-            dailySummaries.map((summary) => (
+            dailySummariesData.map((summary) => (
               <Card key={summary.date} className="shadow-card">
                 <CardHeader>
                   <div className="flex items-center justify-between">
