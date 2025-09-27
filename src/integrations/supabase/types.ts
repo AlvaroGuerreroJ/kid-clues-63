@@ -22,6 +22,8 @@ export type Database = {
           question2_response: string | null
           question3_response: string | null
           question4_response: string | null
+          question5_response: string | null
+          question6_response: string | null
           student_group: string
           student_name: string
           updated_at: string
@@ -33,6 +35,8 @@ export type Database = {
           question2_response?: string | null
           question3_response?: string | null
           question4_response?: string | null
+          question5_response?: string | null
+          question6_response?: string | null
           student_group: string
           student_name: string
           updated_at?: string
@@ -44,6 +48,8 @@ export type Database = {
           question2_response?: string | null
           question3_response?: string | null
           question4_response?: string | null
+          question5_response?: string | null
+          question6_response?: string | null
           student_group?: string
           student_name?: string
           updated_at?: string

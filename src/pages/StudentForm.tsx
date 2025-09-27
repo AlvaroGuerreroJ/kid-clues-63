@@ -16,14 +16,18 @@ const StudentForm = () => {
     question2: "",
     question3: "",
     question4: "",
+    question5: "",
+    question6: "",
   });
   const { toast } = useToast();
 
   const questions = [
-    "¿Cómo te sentiste con la lección de hoy?",
-    "¿Qué fue lo más interesante que aprendiste?",
-    "¿Hubo algo que te resultó difícil de entender?",
-    "¿Qué tan bien trabajaste con tus compañeros de clase hoy?",
+    "¿Respetamos las opiniones de los compañeros?",
+    "¿Cumplimos el rol que se nos designó en equipo?",
+    "¿Pedimos ayuda al grupo cuando tenemos dudas?",
+    "¿Cómo te sentiste durante tu trabajo en equipo? ¿Por qué?",
+    "¿Con quién te gustaría trabajar? ¿Por qué?",
+    "¿Con quién tuviste dificultades al trabajar en equipo?",
   ];
 
   const handleResponseChange = (questionKey: string, value: string) => {
@@ -55,6 +59,8 @@ const StudentForm = () => {
           question2_response: responses.question2,
           question3_response: responses.question3,
           question4_response: responses.question4,
+          question5_response: responses.question5,
+          question6_response: responses.question6,
         });
 
       if (error) {
@@ -80,6 +86,8 @@ const StudentForm = () => {
         question2: "",
         question3: "",
         question4: "",
+        question5: "",
+        question6: "",
       });
     } catch (error) {
       toast({
