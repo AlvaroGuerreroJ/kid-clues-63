@@ -52,7 +52,7 @@ Genera un resumen conciso de máximo 100 palabras que incluya:
 
 El resumen debe ser constructivo, profesional y enfocado en el desarrollo del trabajo en equipo.`;
 
-    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`, {
+    const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
