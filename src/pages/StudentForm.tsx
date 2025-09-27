@@ -180,13 +180,13 @@ const StudentForm = () => {
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="sí" id={`q${index + 1}-yes`} />
                       <Label htmlFor={`q${index + 1}-yes`} className="text-base cursor-pointer">
-                        Sí ✅
+                        Sí
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="no" id={`q${index + 1}-no`} />
                       <Label htmlFor={`q${index + 1}-no`} className="text-base cursor-pointer">
-                        No ❌
+                        No
                       </Label>
                     </div>
                   </RadioGroup>
