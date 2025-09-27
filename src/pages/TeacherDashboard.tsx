@@ -830,7 +830,7 @@ const TeacherDashboard = () => {
                   <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-foreground flex items-center gap-2">
-                        🤖 Resumen IA - Gemini
+                        💡 Resumen y Recomendaciones IA - Gemini
                       </h4>
                       <Button
                         variant="outline"
@@ -838,14 +838,19 @@ const TeacherDashboard = () => {
                         onClick={() => generateStudentSummary(insight.id, insight.originalFeedback)}
                         disabled={loadingStudentSummaries[insight.id]}
                       >
-                        {loadingStudentSummaries[insight.id] ? 'Generando...' : 'Generar Resumen'}
+                        {loadingStudentSummaries[insight.id] ? 'Generando...' : 'Generar Análisis'}
                       </Button>
                     </div>
                     {studentSummaries[insight.id] ? (
-                      <p className="text-sm leading-relaxed text-foreground">{studentSummaries[insight.id]}</p>
+                      <div 
+                        className="text-sm leading-relaxed text-foreground whitespace-pre-line"
+                        dangerouslySetInnerHTML={{ 
+                          __html: studentSummaries[insight.id].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') 
+                        }}
+                      />
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        Haz clic en "Generar Resumen" para obtener un análisis personalizado de las respuestas del estudiante.
+                        Haz clic en "Generar Análisis" para obtener un resumen personalizado y recomendaciones específicas para este estudiante.
                       </p>
                     )}
                   </div>

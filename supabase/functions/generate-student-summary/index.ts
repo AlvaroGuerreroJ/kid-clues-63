@@ -49,14 +49,19 @@ Respuestas:
 5. ¿Qué podrían mejorar en el trabajo en equipo?: ${studentFeedback.question5_response || 'Sin respuesta'}
 6. ¿Cómo te sentiste trabajando en equipo?: ${studentFeedback.question6_response || 'Sin respuesta'}
 
-Genera un resumen conciso de máximo 100 palabras que incluya:
-- El nivel de participación y contribución del estudiante
-- La calidad de la colaboración observada
-- Puntos positivos destacables
-- Áreas de mejora identificadas
-- Recomendaciones específicas para el profesor
+Genera un análisis estructurado de máximo 150 palabras con dos secciones:
 
-El resumen debe ser constructivo, profesional y enfocado en el desarrollo del trabajo en equipo.`;
+**RESUMEN:**
+- Nivel de participación y contribución del estudiante
+- Calidad de colaboración y comunicación
+- Puntos positivos destacables
+
+**RECOMENDACIONES ESPECÍFICAS:**
+- 2-3 estrategias concretas para el profesor para apoyar a este estudiante
+- Actividades específicas que podrían beneficiar su desarrollo
+- Cómo potenciar sus fortalezas y abordar áreas de mejora
+
+Usa un tono constructivo, profesional y enfocado en acciones prácticas para el desarrollo del trabajo en equipo.`;
 
     console.log('Making request to Gemini API...');
 
@@ -75,7 +80,7 @@ El resumen debe ser constructivo, profesional y enfocado en el desarrollo del tr
           temperature: 0.7,
           topK: 1,
           topP: 1,
-          maxOutputTokens: 150,
+          maxOutputTokens: 200,
         },
       }),
     });
