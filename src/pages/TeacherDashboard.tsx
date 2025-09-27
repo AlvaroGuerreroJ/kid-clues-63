@@ -16,6 +16,8 @@ const TeacherDashboard = () => {
   const [loadingSummaries, setLoadingSummaries] = useState<Record<string, boolean>>({});
   const [studentSummaries, setStudentSummaries] = useState<Record<string, string>>({});
   const [loadingStudentSummaries, setLoadingStudentSummaries] = useState<Record<string, boolean>>({});
+  const [periodSummary, setPeriodSummary] = useState<string>('');
+  const [loadingPeriodSummary, setLoadingPeriodSummary] = useState(false);
 
   useEffect(() => {
     fetchStudentFeedback();
@@ -253,6 +255,29 @@ const TeacherDashboard = () => {
     }
   };
 
+  const generatePeriodSummary = async () => {
+    if (loadingPeriodSummary) return;
+    
+    setLoadingPeriodSummary(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-period-summary', {
+        body: { 
+          group: selectedGroup, 
+          dateRange: selectedDate 
+        }
+      });
+
+      if (error) throw error;
+      
+      setPeriodSummary(data.summary);
+    } catch (error) {
+      console.error('Error generating period summary:', error);
+    } finally {
+      setLoadingPeriodSummary(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-teacher-bg p-4">
       <div className="mx-auto max-w-7xl">
@@ -371,6 +396,45 @@ const TeacherDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Period Summary */}
+        <Card className="mb-6 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-950/20 dark:to-purple-950/20 border-blue-200 dark:border-blue-800">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <MessageSquareIcon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">🤖 Resumen Ejecutivo del Período</CardTitle>
+                  <CardDescription>Análisis completo generado por IA de todos los datos disponibles</CardDescription>
+                </div>
+              </div>
+              <Button
+                onClick={generatePeriodSummary}
+                disabled={loadingPeriodSummary}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {loadingPeriodSummary ? 'Generando...' : 'Generar Resumen General'}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {periodSummary ? (
+              <div className="bg-white/50 dark:bg-gray-900/50 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="whitespace-pre-line text-foreground leading-relaxed">
+                  {periodSummary}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/30 dark:bg-gray-900/30 p-6 rounded-lg border border-dashed border-blue-300 dark:border-blue-700 text-center">
+                <p className="text-muted-foreground italic">
+                  Haz clic en "Generar Resumen General" para obtener un análisis ejecutivo completo del período seleccionado.
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Daily Summaries */}
         <div className="mb-8 space-y-4">
