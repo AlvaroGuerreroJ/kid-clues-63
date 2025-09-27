@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, UsersIcon, TrendingUpIcon, AlertTriangleIcon } from "lucide-react";
+import { CalendarIcon, UsersIcon, TrendingUpIcon, AlertTriangleIcon, MessageSquareIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 const TeacherDashboard = () => {
@@ -134,6 +134,63 @@ const TeacherDashboard = () => {
     }
   };
 
+  const generateDailySummaries = () => {
+    const dailyData: Record<string, any[]> = {};
+    
+    // Group insights by date
+    filteredInsights.forEach(insight => {
+      const date = insight.date;
+      if (!dailyData[date]) {
+        dailyData[date] = [];
+      }
+      dailyData[date].push(insight);
+    });
+
+    // Generate summaries for each date
+    return Object.entries(dailyData).map(([date, dayInsights]) => {
+      const totalResponses = dayInsights.length;
+      const sentimentCount = {
+        positive: dayInsights.filter(i => i.sentiment === 'positive').length,
+        neutral: dayInsights.filter(i => i.sentiment === 'neutral').length,
+        attention: dayInsights.filter(i => i.sentiment === 'attention').length,
+      };
+      
+      // Extract top keywords and concerns for the day
+      const allKeywords = dayInsights.flatMap(i => i.keyWords);
+      const keywordCount: Record<string, number> = {};
+      allKeywords.forEach(keyword => {
+        keywordCount[keyword] = (keywordCount[keyword] || 0) + 1;
+      });
+      const topKeywords = Object.entries(keywordCount)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5)
+        .map(([keyword]) => keyword);
+
+      const allConcerns = dayInsights.flatMap(i => i.concerns);
+      const concernCount: Record<string, number> = {};
+      allConcerns.forEach(concern => {
+        concernCount[concern] = (concernCount[concern] || 0) + 1;
+      });
+      const topConcerns = Object.entries(concernCount)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 3)
+        .map(([concern, count]) => ({ concern, count }));
+
+      const activeGroups = [...new Set(dayInsights.map(i => i.group))];
+
+      return {
+        date,
+        totalResponses,
+        sentimentCount,
+        topKeywords,
+        topConcerns,
+        activeGroups,
+      };
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  };
+
+  const dailySummaries = generateDailySummaries();
+
   return (
     <div className="min-h-screen bg-teacher-bg p-4">
       <div className="mx-auto max-w-7xl">
@@ -251,6 +308,112 @@ const TeacherDashboard = () => {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Daily Summaries */}
+        <div className="mb-8 space-y-4">
+          <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
+            <MessageSquareIcon className="h-5 w-5" />
+            Resumen Diario de Feedbacks
+          </h2>
+          
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Cargando resúmenes...</p>
+            </div>
+          ) : dailySummaries.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No hay datos suficientes para generar resúmenes diarios.</p>
+            </div>
+          ) : (
+            dailySummaries.map((summary) => (
+              <Card key={summary.date} className="shadow-card">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg">
+                        📅 {new Date(summary.date).toLocaleDateString('es-ES', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
+                      </CardTitle>
+                      <CardDescription>
+                        {summary.totalResponses} respuestas • {summary.activeGroups.length} grupos activos
+                      </CardDescription>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground">Distribución de Sentimientos</p>
+                      <div className="flex gap-2 mt-1">
+                        <Badge className="bg-insight-positive text-success text-xs">
+                          😊 {summary.sentimentCount.positive}
+                        </Badge>
+                        <Badge className="bg-insight-neutral text-muted-foreground text-xs">
+                          😐 {summary.sentimentCount.neutral}
+                        </Badge>
+                        <Badge className="bg-insight-attention text-warning-foreground text-xs">
+                          😟 {summary.sentimentCount.attention}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {/* Active Groups */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">Grupos Participantes:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {summary.activeGroups.map((group, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {group}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Top Keywords */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">Temas Principales:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {summary.topKeywords.length > 0 ? (
+                          summary.topKeywords.map((keyword, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {keyword}
+                            </Badge>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Sin temas identificados</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Top Concerns */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-warning">Preocupaciones del Día:</p>
+                      <div className="space-y-1">
+                        {summary.topConcerns.length > 0 ? (
+                          summary.topConcerns.map((concern, index) => (
+                            <div key={index} className="flex items-center justify-between">
+                              <Badge variant="destructive" className="text-xs">
+                                {concern.concern}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {concern.count} estudiante{concern.count > 1 ? 's' : ''}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-muted-foreground">Sin preocupaciones registradas</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Individual Insights */}
