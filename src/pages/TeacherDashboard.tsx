@@ -135,7 +135,7 @@ const TeacherDashboard = () => {
     };
   };
 
-  const calculateYesNoMetrics = () => {
+  const calculateYesNoMetrics = useCallback(() => {
     const metrics = {
       question1: { yes: 0, no: 0, total: 0 },
       question2: { yes: 0, no: 0, total: 0 },
@@ -172,9 +172,9 @@ const TeacherDashboard = () => {
     });
 
     return metrics;
-  };
+  }, [filteredInsights]);
 
-  const getChartData = () => {
+  const getChartData = useCallback(() => {
     const metrics = calculateYesNoMetrics();
     return [
       {
@@ -196,7 +196,7 @@ const TeacherDashboard = () => {
         yesPercentage: metrics.question3.total > 0 ? Math.round((metrics.question3.yes / metrics.question3.total) * 100) : 0
       }
     ];
-  };
+  }, [calculateYesNoMetrics]);
 
   const stats = calculateStats();
   const yesNoMetrics = calculateYesNoMetrics();
