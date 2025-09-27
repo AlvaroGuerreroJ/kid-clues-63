@@ -548,8 +548,8 @@ const TeacherDashboard = () => {
                     <YAxis />
                     <Tooltip 
                       formatter={(value, name) => [
-                        name === 'yes' ? `Sí: ${value}` : `No: ${value}`,
-                        name === 'yes' ? 'Respuestas Sí' : 'Respuestas No'
+                        name === 'Sí' ? `Sí: ${value}` : `No: ${value}`,
+                        name === 'Sí' ? 'Respuestas Sí' : 'Respuestas No'
                       ]}
                       labelFormatter={(label) => `Pregunta: ${label.replace('\n', ' ')}`}
                     />
