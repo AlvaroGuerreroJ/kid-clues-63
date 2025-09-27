@@ -1,0 +1,6 @@
+INSERT INTO student_feedback (student_name, student_group, question1_response, question2_response, question3_response, question4_response, question5_response, question6_response) VALUES 
+('Diego Mamani', 'Grupo A', 'sí', 'sí', 'no', 'Me gusta trabajar con mis compañeros pero a veces no nos ponemos de acuerdo', 'Cuando alguien no entiende le explico y le ayudo', 'Me siento bien cuando todos participamos'),
+('Sofía Quispe', 'Grupo B', 'sí', 'no', 'sí', 'A veces es difícil escuchar a todos porque hablan al mismo tiempo', 'Trato de ser amable y compartir mis ideas', 'Me gusta más cuando trabajamos juntos que solos'),
+('Mateo Huamán', 'Grupo A', 'no', 'sí', 'sí', 'Mi grupo trabaja bien pero yo prefiero hacer las cosas yo solo', 'Ayudo cuando me piden pero no siempre me doy cuenta', 'Es divertido pero a veces me da vergüenza hablar'),
+('Valentina Ccoa', 'Grupo C', 'sí', 'sí', 'sí', 'Mi equipo se lleva muy bien y todos aportamos ideas geniales', 'Siempre trato de incluir a todos y pregunto si necesitan ayuda', 'Me encanta trabajar en equipo porque aprendemos más'),
+('Sebastián Flores', 'Grupo B', 'sí', 'no', 'no', 'A veces hay compañeros que no quieren trabajar y eso me molesta', 'Trato de ayudar pero me frustro cuando no me hacen caso', 'Prefiero trabajar con mis amigos de siempre');
