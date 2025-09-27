@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const StudentForm = () => {
   const [studentName, setStudentName] = useState("");
@@ -32,7 +33,7 @@ const StudentForm = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!studentName || !studentGroup) {
@@ -44,21 +45,50 @@ const StudentForm = () => {
       return;
     }
 
-    // Simulate form submission
-    toast({
-      title: "¡Respuestas Enviadas!",
-      description: "Gracias por compartir tus pensamientos con nosotros.",
-    });
+    try {
+      const { error } = await supabase
+        .from('student_feedback')
+        .insert({
+          student_name: studentName,
+          student_group: studentGroup,
+          question1_response: responses.question1,
+          question2_response: responses.question2,
+          question3_response: responses.question3,
+          question4_response: responses.question4,
+        });
 
-    // Reset form
-    setStudentName("");
-    setStudentGroup("");
-    setResponses({
-      question1: "",
-      question2: "",
-      question3: "",
-      question4: "",
-    });
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Hubo un problema al enviar tus respuestas. Intenta de nuevo.",
+          variant: "destructive",
+        });
+        console.error('Error saving feedback:', error);
+        return;
+      }
+
+      toast({
+        title: "¡Respuestas Enviadas!",
+        description: "Gracias por compartir tus pensamientos con nosotros.",
+      });
+
+      // Reset form
+      setStudentName("");
+      setStudentGroup("");
+      setResponses({
+        question1: "",
+        question2: "",
+        question3: "",
+        question4: "",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Hubo un problema al enviar tus respuestas. Intenta de nuevo.",
+        variant: "destructive",
+      });
+      console.error('Error saving feedback:', error);
+    }
   };
 
   return (

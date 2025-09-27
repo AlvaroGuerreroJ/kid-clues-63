@@ -1,60 +1,120 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { CalendarIcon, UsersIcon, TrendingUpIcon, AlertTriangleIcon } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const TeacherDashboard = () => {
   const [selectedGroup, setSelectedGroup] = useState("all");
   const [selectedDate, setSelectedDate] = useState("today");
+  const [insights, setInsights] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for insights
-  const insights = [
-    {
-      id: 1,
-      student: "Emma Thompson",
-      group: "Group A - Dolphins",
-      date: "2024-01-15",
-      sentiment: "positive",
-      summary: "Shows strong engagement with math concepts, particularly enjoyed group work.",
-      keyWords: ["excited", "challenging", "teamwork"],
-      concerns: [],
-    },
-    {
-      id: 2,
-      student: "Liam Johnson",
-      group: "Group B - Eagles", 
-      date: "2024-01-15",
-      sentiment: "neutral",
-      summary: "Understanding concepts but struggling with confidence in participation.",
-      keyWords: ["difficult", "quiet", "thinking"],
-      concerns: ["confidence", "participation"],
-    },
-    {
-      id: 3,
-      student: "Sophia Chen",
-      group: "Group A - Dolphins",
-      date: "2024-01-15",
-      sentiment: "attention",
-      summary: "Expressed frustration with reading comprehension tasks, needs additional support.",
-      keyWords: ["frustrated", "confused", "help"],
-      concerns: ["reading comprehension", "emotional support"],
-    },
-  ];
+  useEffect(() => {
+    fetchStudentFeedback();
+  }, []);
 
-  const groupStats = {
-    "Group A - Dolphins": { positive: 8, neutral: 3, attention: 2 },
-    "Group B - Eagles": { positive: 6, neutral: 5, attention: 1 },
-    "Group C - Lions": { positive: 7, neutral: 4, attention: 1 },
-    "Group D - Owls": { positive: 9, neutral: 2, attention: 1 },
+  const fetchStudentFeedback = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('student_feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching feedback:', error);
+        setLoading(false);
+        return;
+      }
+
+      // Transform the data to match the expected format
+      const transformedInsights = data?.map((feedback: any) => ({
+        id: feedback.id,
+        student: feedback.student_name,
+        group: getGroupDisplayName(feedback.student_group),
+        date: new Date(feedback.created_at).toISOString().split('T')[0],
+        sentiment: analyzeSentiment(feedback),
+        summary: generateSummary(feedback),
+        keyWords: extractKeyWords(feedback),
+        concerns: extractConcerns(feedback),
+      })) || [];
+
+      setInsights(transformedInsights);
+    } catch (error) {
+      console.error('Error fetching feedback:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getGroupDisplayName = (groupId: string) => {
+    const groupMap: Record<string, string> = {
+      'group-a': 'Grupo A - Delfines',
+      'group-b': 'Grupo B - Águilas', 
+      'group-c': 'Grupo C - Leones',
+      'group-d': 'Grupo D - Búhos',
+    };
+    return groupMap[groupId] || groupId;
+  };
+
+  const analyzeSentiment = (feedback: any) => {
+    const positiveWords = ['emocionada', 'feliz', 'genial', 'excelente', 'increíble', 'fantástica', 'motivada', 'orgullosa', 'entusiasmado', 'confiada'];
+    const negativeWords = ['confundido', 'difícil', 'nervioso', 'cansada', 'complicados', 'costó'];
+    
+    const allText = `${feedback.question1_response} ${feedback.question2_response} ${feedback.question3_response} ${feedback.question4_response}`.toLowerCase();
+    
+    const positiveCount = positiveWords.filter(word => allText.includes(word)).length;
+    const negativeCount = negativeWords.filter(word => allText.includes(word)).length;
+    
+    if (positiveCount > negativeCount && positiveCount > 0) return 'positive';
+    if (negativeCount > positiveCount && negativeCount > 0) return 'attention';
+    return 'neutral';
+  };
+
+  const generateSummary = (feedback: any) => {
+    const responses = [feedback.question1_response, feedback.question2_response, feedback.question3_response, feedback.question4_response];
+    const mainResponse = responses.find(r => r && r.length > 50) || responses.find(r => r && r.length > 0) || '';
+    return mainResponse.substring(0, 100) + (mainResponse.length > 100 ? '...' : '');
+  };
+
+  const extractKeyWords = (feedback: any) => {
+    const allText = `${feedback.question1_response} ${feedback.question2_response} ${feedback.question3_response} ${feedback.question4_response}`.toLowerCase();
+    const keywords = ['matemáticas', 'ciencias', 'lectura', 'equipo', 'difícil', 'fácil', 'interesante', 'aburrido', 'divertido'];
+    return keywords.filter(word => allText.includes(word)).slice(0, 3);
+  };
+
+  const extractConcerns = (feedback: any) => {
+    const allText = `${feedback.question1_response} ${feedback.question2_response} ${feedback.question3_response} ${feedback.question4_response}`.toLowerCase();
+    const concerns = [];
+    if (allText.includes('difícil') || allText.includes('complicado')) concerns.push('dificultad académica');
+    if (allText.includes('nervioso') || allText.includes('confundido')) concerns.push('ansiedad');
+    if (allText.includes('cansado') || allText.includes('cansada')) concerns.push('fatiga');
+    return concerns;
   };
 
   const filteredInsights = insights.filter(insight => {
     if (selectedGroup === "all") return true;
-    return insight.group === selectedGroup;
+    return insight.group.includes(selectedGroup.split('-')[1]?.charAt(0).toUpperCase() + (selectedGroup.split('-')[1]?.slice(1) || ''));
   });
+
+  const calculateStats = () => {
+    const total = insights.length;
+    const positive = insights.filter(i => i.sentiment === 'positive').length;
+    const attention = insights.filter(i => i.sentiment === 'attention').length;
+    const activeGroups = [...new Set(insights.map(i => i.group))].length;
+    
+    return {
+      total,
+      positivePercentage: total > 0 ? Math.round((positive / total) * 100) : 0,
+      attention,
+      activeGroups
+    };
+  };
+
+  const stats = calculateStats();
 
   const getSentimentColor = (sentiment: string) => {
     switch (sentiment) {
@@ -141,7 +201,7 @@ const TeacherDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Respuestas Totales</p>
-                  <p className="text-2xl font-bold text-primary">13</p>
+                  <p className="text-2xl font-bold text-primary">{stats.total}</p>
                 </div>
                 <div className="rounded-full bg-primary/10 p-3">
                   <CalendarIcon className="h-6 w-6 text-primary" />
@@ -155,7 +215,7 @@ const TeacherDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Sentimiento Positivo</p>
-                  <p className="text-2xl font-bold text-success">76%</p>
+                  <p className="text-2xl font-bold text-success">{stats.positivePercentage}%</p>
                 </div>
                 <div className="rounded-full bg-success/10 p-3">
                   <TrendingUpIcon className="h-6 w-6 text-success" />
@@ -169,7 +229,7 @@ const TeacherDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Necesitan Atención</p>
-                  <p className="text-2xl font-bold text-warning">5</p>
+                  <p className="text-2xl font-bold text-warning">{stats.attention}</p>
                 </div>
                 <div className="rounded-full bg-warning/10 p-3">
                   <AlertTriangleIcon className="h-6 w-6 text-warning" />
@@ -183,7 +243,7 @@ const TeacherDashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Grupos Activos</p>
-                  <p className="text-2xl font-bold text-secondary">4</p>
+                  <p className="text-2xl font-bold text-secondary">{stats.activeGroups}</p>
                 </div>
                 <div className="rounded-full bg-secondary/10 p-3">
                   <UsersIcon className="h-6 w-6 text-secondary" />
@@ -197,7 +257,16 @@ const TeacherDashboard = () => {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold text-foreground">Perspectivas de Estudiantes</h2>
           
-          {filteredInsights.map((insight) => (
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">Cargando perspectivas...</p>
+            </div>
+          ) : filteredInsights.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No hay respuestas disponibles aún.</p>
+            </div>
+          ) : (
+            filteredInsights.map((insight) => (
             <Card key={insight.id} className="shadow-card">
               <CardHeader>
                 <div className="flex items-start justify-between">
@@ -217,12 +286,12 @@ const TeacherDashboard = () => {
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground">Palabras Clave:</p>
                     <div className="flex flex-wrap gap-2">
-                      {insight.keyWords.map((word, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {word}
-                        </Badge>
-                      ))}
-                    </div>
+                       {insight.keyWords.map((word, index) => (
+                         <Badge key={index} variant="secondary" className="text-xs">
+                           {word}
+                         </Badge>
+                       ))}
+                     </div>
                   </div>
 
                   {insight.concerns.length > 0 && (
@@ -240,7 +309,8 @@ const TeacherDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
