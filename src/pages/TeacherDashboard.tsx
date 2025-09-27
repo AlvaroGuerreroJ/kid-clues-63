@@ -49,7 +49,7 @@ const TeacherDashboard = () => {
         summary: generateSummary(feedback),
         keyWords: extractKeyWords(feedback),
         concerns: extractConcerns(feedback),
-        // Include all original responses
+        // Include all original responses and timestamps
         originalFeedback: {
           student_name: feedback.student_name,
           student_group: feedback.student_group,
@@ -59,6 +59,7 @@ const TeacherDashboard = () => {
           question4_response: feedback.question4_response,
           question5_response: feedback.question5_response,
           question6_response: feedback.question6_response,
+          created_at: feedback.created_at,
         }
       })) || [];
 
@@ -122,8 +123,8 @@ const TeacherDashboard = () => {
       if (insight.group !== groupDisplayName) return false;
     }
     
-    // Filter by date
-    const insightDate = new Date(insight.date);
+    // Filter by date - use the original created_at timestamp for accurate filtering
+    const insightDate = new Date(insight.originalFeedback.created_at);
     const today = new Date();
     today.setHours(23, 59, 59, 999); // End of today
     
