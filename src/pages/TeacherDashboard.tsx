@@ -42,6 +42,15 @@ const TeacherDashboard = () => {
         summary: generateSummary(feedback),
         keyWords: extractKeyWords(feedback),
         concerns: extractConcerns(feedback),
+        // Include all original responses
+        originalFeedback: {
+          question1_response: feedback.question1_response,
+          question2_response: feedback.question2_response,
+          question3_response: feedback.question3_response,
+          question4_response: feedback.question4_response,
+          question5_response: feedback.question5_response,
+          question6_response: feedback.question6_response,
+        }
       })) || [];
 
       setInsights(transformedInsights);
@@ -470,7 +479,64 @@ const TeacherDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-foreground">{insight.summary}</p>
+                  {/* Respuestas completas del estudiante */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-foreground">📝 Respuestas del Estudiante:</h4>
+                    
+                    {insight.originalFeedback.question1_response && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          1. ¿Cómo contribuiste al trabajo en equipo hoy?
+                        </p>
+                        <p className="text-sm">{insight.originalFeedback.question1_response}</p>
+                      </div>
+                    )}
+                    
+                    {insight.originalFeedback.question2_response && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          2. ¿Cómo fue la comunicación con tus compañeros?
+                        </p>
+                        <p className="text-sm">{insight.originalFeedback.question2_response}</p>
+                      </div>
+                    )}
+                    
+                    {insight.originalFeedback.question3_response && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          3. ¿Qué desafíos enfrentaron como equipo?
+                        </p>
+                        <p className="text-sm">{insight.originalFeedback.question3_response}</p>
+                      </div>
+                    )}
+                    
+                    {insight.originalFeedback.question4_response && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          4. ¿Lograron cumplir los objetivos como equipo?
+                        </p>
+                        <p className="text-sm">{insight.originalFeedback.question4_response}</p>
+                      </div>
+                    )}
+                    
+                    {insight.originalFeedback.question5_response && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          5. ¿Qué podrían mejorar en el trabajo en equipo?
+                        </p>
+                        <p className="text-sm">{insight.originalFeedback.question5_response}</p>
+                      </div>
+                    )}
+                    
+                    {insight.originalFeedback.question6_response && (
+                      <div className="bg-muted p-3 rounded-lg">
+                        <p className="text-xs font-medium text-muted-foreground mb-1">
+                          6. ¿Cómo te sentiste trabajando en equipo?
+                        </p>
+                        <p className="text-sm">{insight.originalFeedback.question6_response}</p>
+                      </div>
+                    )}
+                  </div>
                   
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-muted-foreground">Palabras Clave:</p>
