@@ -19,10 +19,10 @@ const StudentForm = () => {
   const { toast } = useToast();
 
   const questions = [
-    "How did you feel about today's lesson?",
-    "What was the most interesting thing you learned?",
-    "Was there anything you found difficult to understand?",
-    "How well did you work with your classmates today?",
+    "¿Cómo te sentiste con la lección de hoy?",
+    "¿Qué fue lo más interesante que aprendiste?",
+    "¿Hubo algo que te resultó difícil de entender?",
+    "¿Qué tan bien trabajaste con tus compañeros de clase hoy?",
   ];
 
   const handleResponseChange = (questionKey: string, value: string) => {
@@ -37,8 +37,8 @@ const StudentForm = () => {
     
     if (!studentName || !studentGroup) {
       toast({
-        title: "Missing Information",
-        description: "Please enter your name and select your group.",
+        title: "Información Faltante",
+        description: "Por favor ingresa tu nombre y selecciona tu grupo.",
         variant: "destructive",
       });
       return;
@@ -46,8 +46,8 @@ const StudentForm = () => {
 
     // Simulate form submission
     toast({
-      title: "Responses Submitted!",
-      description: "Thank you for sharing your thoughts with us.",
+      title: "¡Respuestas Enviadas!",
+      description: "Gracias por compartir tus pensamientos con nosotros.",
     });
 
     // Reset form
@@ -66,43 +66,43 @@ const StudentForm = () => {
       <div className="mx-auto max-w-2xl">
         <div className="mb-8 text-center">
           <h1 className="mb-2 text-3xl font-bold text-foreground">
-            📝 Daily Reflection
+            📝 Reflexión Diaria
           </h1>
           <p className="text-muted-foreground">
-            Share your thoughts about today's learning experience
+            Comparte tus pensamientos sobre la experiencia de aprendizaje de hoy
           </p>
         </div>
 
         <Card className="shadow-card">
           <CardHeader>
-            <CardTitle className="text-primary">Tell us about yourself</CardTitle>
+            <CardTitle className="text-primary">Cuéntanos sobre ti</CardTitle>
             <CardDescription>
-              First, let us know who you are
+              Primero, dinos quién eres
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Your Name</Label>
+                <Label htmlFor="name">Tu Nombre</Label>
                 <Input
                   id="name"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  placeholder="Enter your name"
+                  placeholder="Ingresa tu nombre"
                   className="transition-all duration-200 focus:ring-primary/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="group">Your Group</Label>
+                <Label htmlFor="group">Tu Grupo</Label>
                 <Select value={studentGroup} onValueChange={setStudentGroup}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select your group" />
+                    <SelectValue placeholder="Selecciona tu grupo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="group-a">Group A - Dolphins</SelectItem>
-                    <SelectItem value="group-b">Group B - Eagles</SelectItem>
-                    <SelectItem value="group-c">Group C - Lions</SelectItem>
-                    <SelectItem value="group-d">Group D - Owls</SelectItem>
+                    <SelectItem value="group-a">Grupo A - Delfines</SelectItem>
+                    <SelectItem value="group-b">Grupo B - Águilas</SelectItem>
+                    <SelectItem value="group-c">Grupo C - Leones</SelectItem>
+                    <SelectItem value="group-d">Grupo D - Búhos</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -115,7 +115,7 @@ const StudentForm = () => {
             <Card key={index} className="shadow-card">
               <CardHeader>
                 <CardTitle className="text-lg text-secondary">
-                  Question {index + 1}
+                  Pregunta {index + 1}
                 </CardTitle>
                 <CardDescription className="text-base">
                   {question}
@@ -125,7 +125,7 @@ const StudentForm = () => {
                 <Textarea
                   value={responses[`question${index + 1}` as keyof typeof responses]}
                   onChange={(e) => handleResponseChange(`question${index + 1}`, e.target.value)}
-                  placeholder="Write your answer here..."
+                  placeholder="Escribe tu respuesta aquí..."
                   className="min-h-[100px] transition-all duration-200 focus:ring-secondary/20"
                   rows={4}
                 />
@@ -139,7 +139,7 @@ const StudentForm = () => {
               variant="student"
               className="w-full sm:w-auto"
             >
-              Submit My Responses ✨
+              Enviar Mis Respuestas ✨
             </Button>
           </div>
         </form>
