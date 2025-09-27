@@ -14,6 +14,8 @@ const TeacherDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [dailySummaries, setDailySummaries] = useState<Record<string, string>>({});
   const [loadingSummaries, setLoadingSummaries] = useState<Record<string, boolean>>({});
+  const [studentSummaries, setStudentSummaries] = useState<Record<string, string>>({});
+  const [loadingStudentSummaries, setLoadingStudentSummaries] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchStudentFeedback();
@@ -44,6 +46,8 @@ const TeacherDashboard = () => {
         concerns: extractConcerns(feedback),
         // Include all original responses
         originalFeedback: {
+          student_name: feedback.student_name,
+          student_group: feedback.student_group,
           question1_response: feedback.question1_response,
           question2_response: feedback.question2_response,
           question3_response: feedback.question3_response,
@@ -223,6 +227,29 @@ const TeacherDashboard = () => {
       console.error('Error generating summary:', error);
     } finally {
       setLoadingSummaries(prev => ({ ...prev, [date]: false }));
+    }
+  };
+
+  const generateStudentSummary = async (insightId: string, studentFeedback: any) => {
+    if (loadingStudentSummaries[insightId]) return;
+    
+    setLoadingStudentSummaries(prev => ({ ...prev, [insightId]: true }));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-student-summary', {
+        body: { studentFeedback }
+      });
+
+      if (error) throw error;
+      
+      setStudentSummaries(prev => ({
+        ...prev,
+        [insightId]: data.summary
+      }));
+    } catch (error) {
+      console.error('Error generating student summary:', error);
+    } finally {
+      setLoadingStudentSummaries(prev => ({ ...prev, [insightId]: false }));
     }
   };
 
@@ -479,6 +506,30 @@ const TeacherDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  {/* Resumen generado por IA */}
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-foreground flex items-center gap-2">
+                        🤖 Resumen IA - Gemini
+                      </h4>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generateStudentSummary(insight.id, insight.originalFeedback)}
+                        disabled={loadingStudentSummaries[insight.id]}
+                      >
+                        {loadingStudentSummaries[insight.id] ? 'Generando...' : 'Generar Resumen'}
+                      </Button>
+                    </div>
+                    {studentSummaries[insight.id] ? (
+                      <p className="text-sm leading-relaxed text-foreground">{studentSummaries[insight.id]}</p>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        Haz clic en "Generar Resumen" para obtener un análisis personalizado de las respuestas del estudiante.
+                      </p>
+                    )}
+                  </div>
+
                   {/* Respuestas completas del estudiante */}
                   <div className="space-y-3">
                     <h4 className="font-medium text-foreground">📝 Respuestas del Estudiante:</h4>

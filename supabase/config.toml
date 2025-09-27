@@ -56,3 +56,6 @@ inspector_port = 8083
 
 [functions.generate-daily-summary]
 verify_jwt = false
+
+[functions.generate-student-summary]
+verify_jwt = false
