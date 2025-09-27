@@ -14,42 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      student_feedback: {
-        Row: {
-          created_at: string
-          id: string
-          question1_response: string | null
-          question2_response: string | null
-          question3_response: string | null
-          question4_response: string | null
-          student_group: string
-          student_name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          question1_response?: string | null
-          question2_response?: string | null
-          question3_response?: string | null
-          question4_response?: string | null
-          student_group: string
-          student_name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          question1_response?: string | null
-          question2_response?: string | null
-          question3_response?: string | null
-          question4_response?: string | null
-          student_group?: string
-          student_name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
