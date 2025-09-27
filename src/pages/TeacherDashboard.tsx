@@ -253,17 +253,18 @@ const TeacherDashboard = () => {
   const generateDailySummaries = () => {
     const dailyData: Record<string, any[]> = {};
     
-    // Group insights by date
+    // Group insights by date using original timestamp
     filteredInsights.forEach(insight => {
-      const date = insight.date;
-      if (!dailyData[date]) {
-        dailyData[date] = [];
+      // Use the original created_at timestamp to get the correct local date
+      const localDate = new Date(insight.originalFeedback.created_at).toLocaleDateString('en-CA'); // YYYY-MM-DD format
+      if (!dailyData[localDate]) {
+        dailyData[localDate] = [];
       }
-      dailyData[date].push(insight);
+      dailyData[localDate].push(insight);
     });
 
     // Generate summaries for each date
-    return Object.entries(dailyData).map(([date, dayInsights]) => {
+    return Object.entries(dailyData).map(([dateString, dayInsights]) => {
       const totalResponses = dayInsights.length;
       const sentimentCount = {
         positive: dayInsights.filter(i => i.sentiment === 'positive').length,
@@ -295,14 +296,16 @@ const TeacherDashboard = () => {
       const activeGroups = [...new Set(dayInsights.map(i => i.group))];
 
       return {
-        date,
+        date: dateString,
+        // Keep the original timestamp for accurate day-of-week display
+        originalTimestamp: dayInsights[0].originalFeedback.created_at,
         totalResponses,
         sentimentCount,
         topKeywords,
         topConcerns,
         activeGroups,
       };
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }).sort((a, b) => new Date(b.originalTimestamp).getTime() - new Date(a.originalTimestamp).getTime());
   };
 
   const dailySummariesData = generateDailySummaries();
@@ -711,7 +714,7 @@ const TeacherDashboard = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="text-lg">
-                        📅 {new Date(summary.date).toLocaleDateString('es-ES', { 
+                        📅 {new Date(summary.originalTimestamp).toLocaleDateString('es-ES', { 
                           weekday: 'long', 
                           year: 'numeric', 
                           month: 'long', 
