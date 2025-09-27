@@ -2,17 +2,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpenIcon, BarChart3Icon, UsersIcon, BrainIcon } from "lucide-react";
-
 const Index = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+  return <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
           <div className="mb-6">
-            <h1 className="mb-4 text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-              🎓 ClassInsight AI
-            </h1>
+            <h1 className="mb-4 text-5xl font-bold bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">🎓 Aula Autonoma</h1>
             <p className="mx-auto max-w-2xl text-xl text-muted-foreground">
               Transform student feedback into actionable insights. Help teachers understand classroom behavior and learning trends through AI-powered analysis.
             </p>
@@ -119,8 +115,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;
